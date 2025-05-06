@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Satellite Map with Political Labels</title>
+        <style>
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            #map {
+                height: 100%;
+                width: 100%;
+                position: relative;
+            }
+            .custom-zoom-button {
+                position: absolute;
+                background-color: white;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+                padding: 5px 10px;
+                font-size: 16px;
+                cursor: pointer;
+                z-index: 1000;
+            }
+            .custom-zoom-button:hover {
+                background-color: #f0f0f0;
+            }
+            #control-panel {
+                position: absolute;
+                top: 50px;
+                right: 10px;
+                background-color: white;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                padding: 10px;
+                z-index: 1000;
+                font-family: Arial, sans-serif;
+            }
+            #control-panel label {
+                display: block;
+                margin-bottom: 5px;
+                font-size: 14px;
+            }
+            #control-panel select, #control-panel button {
+                margin-bottom: 10px;
+                width: 100%;
+                padding: 5px;
+                font-size: 14px;
+            }
+        </style>
+        <body>
+            <header style="padding: 10px; background-color: #333; color: white; text-align: center;">
+              Satellite Map Viewer
+            </header>
+            <div id="map"></div>
+          </body>
+        <script>
+            let map;
+
+            function initMap() {
+                map = new google.maps.Map(document.getElementById("map"), {
+                    center: { lat: 20.0, lng: 0.0 },
+                    zoom: 3,
+                    mapTypeId: 'hybrid',
+                    styles: [
+                        { featureType: "road", elementType: "labels", stylers: [{ visibility: "off" }] },
+                        { featureType: "road", elementType: "geometry", stylers: [{ visibility: "off" }] },
+                        { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] },
+                        { featureType: "transit", elementType: "labels", stylers: [{ visibility: "off" }] },
+                        { featureType: "administrative.country", elementType: "labels", stylers: [{ visibility: "on" }] },
+                        { featureType: "administrative.country", elementType: "geometry", stylers: [{ visibility: "on" }] },
+                        { featureType: "administrative.province", elementType: "labels", stylers: [{ visibility: "on" }] }
+                    ],
+                    disableDefaultUI: true,
+                    fullscreenControl: false,
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    zoomControl: false,
+                    gestureHandling: "greedy",
+                    scrollwheel: true,
+                    minZoom: 1,
+                    maxZoom: 20
+                });
+
+                addCustomZoomControls();
+                addControlPanel();
+            }
+
+            function addCustomZoomControls() {
+                const zoomInButton = document.createElement("button");
+                zoomInButton.textContent = "+";
+                zoomInButton.classList.add("custom-zoom-button");
+                zoomInButton.style.top = "10px";
+                zoomInButton.style.left = "10px";
+
+                const zoomOutButton = document.createElement("button");
+                zoomOutButton.textContent = "-";
+                zoomOutButton.classList.add("custom-zoom-button");
+                zoomOutButton.style.top = "50px";
+                zoomOutButton.style.left = "10px";
+
+                zoomInButton.addEventListener("click", () => {
+                    const currentZoom = map.getZoom();
+                    map.setZoom(Math.min(currentZoom + 1, map.maxZoom || 20));
+                });
+
+                zoomOutButton.addEventListener("click", () => {
+                    const currentZoom = map.getZoom();
+                    map.setZoom(Math.max(currentZoom - 1, map.minZoom || 1));
+                });
+
+                const mapDiv = document.getElementById("map");
+                mapDiv.appendChild(zoomInButton);
+                mapDiv.appendChild(zoomOutButton);
+            }
+
+            function addControlPanel() {
+                const controlPanel = document.createElement("div");
+                controlPanel.id = "control-panel";
+
+                const mapTypeLabel = document.createElement("label");
+                mapTypeLabel.textContent = "Map Type:";
+                controlPanel.appendChild(mapTypeLabel);
+
+                const mapTypeSelect = document.createElement("select");
+                mapTypeSelect.innerHTML = `
+                    <option value="roadmap">Roadmap</option>
+                    <option value="satellite">Satellite</option>
+                    <option value="hybrid" selected>Hybrid</option>
+                    <option value="terrain">Terrain</option>
+                `;
+                mapTypeSelect.addEventListener("change", (event) => {
+                    map.setMapTypeId(event.target.value);
+                });
+                controlPanel.appendChild(mapTypeSelect);
+
+                const resetButton = document.createElement("button");
+                resetButton.textContent = "Reset Map";
+                resetButton.addEventListener("click", () => {
+                    map.setCenter({ lat: 20.0, lng: 0.0 });
+                    map.setZoom(3);
+                });
+                controlPanel.appendChild(resetButton);
+
+                document.body.appendChild(controlPanel);
+            }
+        </script>
+    </head>
+    <body>
+        <div id="map"></div>
+        <!-- IMPORTANT: Load API with callback to initMap -->
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAiNtpFPlzqD8jNRrzDm4mby8R_6giFTVw&callback=initMap" async defer></script>
+    </body>
+</html>
